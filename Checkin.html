@@ -1,0 +1,57 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Check-In</title>
+  <script>
+    function getParameterByName(name) {
+      const url = window.location.href;
+      name = name.replace(/[
+    
+]/g, '\\');
+      const regex = new RegExp('[?   ]' + name + '(=([^   #]*)|   |#|)');
+      const results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    function sendData(id, latitude, longitude) {
+      fetch('https://script.google.com/macros/s/AKfycbzLkJLHgdSxN1tCQIFWhCfu2bf7zMdTE-Axwz1aRQ1ov_yvq5rQVp_q4MWuW4lvWerw/exec', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, latitude, longitude })
+      })
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('status').innerText = '✅ Check-in realizado com sucesso!';
+      })
+      .catch(error => {document.getElementById('status').innerText = '❌ Erro no envio: ' + error;
+      });
+    }
+
+    function getLocationAndSend() {
+      const id = getParameterByName('id') || "Guilherme Santos";
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            sendData(id, position.coords.latitude, position.coords.longitude);
+          },
+          error => {
+            document.getElementById('status').innerText = '❗ Permissão de localização negada.';
+          }
+        );
+      } else {
+        document.getElementById('status').innerText = '❗ Geolocalização não suportada.';
+      }
+    }
+
+    window.onload = getLocationAndSend;
+  </script>
+</head>
+<body>
+  <h2>Check-In</h2>
+  <p id="status">📍 A obter localização e enviar dados...</p>
+</body>
+</html>
+
