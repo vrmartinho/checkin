@@ -16,6 +16,8 @@
     }
 
     function sendData(id, latitude, longitude) {
+      console.log("A enviar dados:", { id, latitude, longitude });
+
       fetch('https://script.google.com/macros/s/AKfycbzLkJLHgdSxN1tCQIFWhCfu2bf7zMdTE-Axwz1aRQ1ov_yvq5rQVp_q4MWuW4lvWerw/exec', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,26 +25,32 @@
       })
       .then(response => response.text())
       .then(data => {
+        console.log("Resposta do servidor:", data);
         document.getElementById('status').innerText = '✅ Check-in realizado com sucesso!';
       })
-      .catch(error => {document.getElementById('status').innerText = '❌ Erro no envio: ' + error;
+      .catch(error => {console.error('Erro no fetch:', error);
+        document.getElementById('status').innerText = '❌ Erro ao enviar dados: ' + error.message;
       });
     }
 
     function getLocationAndSend() {
       const id = getParameterByName('id') || "Guilherme Santos";
+      console.log("ID detectado:", id);
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           position => {
+            console.log("Localização obtida:", position.coords);
             sendData(id, position.coords.latitude, position.coords.longitude);
           },
           error => {
-            document.getElementById('status').innerText = '❗ Permissão de localização negada.';
+            console.error('Erro na geolocalização:', error);
+            document.getElementById('status').innerText = '❗ Erro na localização: ' + error.message;
           }
         );
       } else {
         document.getElementById('status').innerText = '❗ Geolocalização não suportada.';
+        console.error('Geolocalização não suportada.');
       }
     }
 
@@ -54,4 +62,6 @@
   <p id="status">📍 A obter localização e enviar dados...</p>
 </body>
 </html>
+
+
 
